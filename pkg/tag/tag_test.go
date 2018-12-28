@@ -7,7 +7,7 @@ import (
 )
 
 type obj struct {
-	id int `odd:"id"`
+	Id int `odd:"id"`
 }
 
 func isSliceEqual(a, b []string) bool {
@@ -48,7 +48,7 @@ func TestGetTaggedFields(t *testing.T) {
 			args{
 				obj{11},
 			},
-			[]string{"id"},
+			[]string{"Id"},
 		}, {
 			"nested",
 			args{
@@ -58,7 +58,7 @@ func TestGetTaggedFields(t *testing.T) {
 					obj{12},
 				},
 			},
-			[]string{"id"},
+			[]string{"Id"},
 		}, {
 			"tagged struct",
 			args{
@@ -68,7 +68,15 @@ func TestGetTaggedFields(t *testing.T) {
 					obj{12},
 				},
 			},
-			[]string{"id", "Obj"},
+			[]string{"Id", "Obj"},
+		}, {
+			"omit empty",
+			args{
+				struct {
+					Test int `odd:"obj"`
+				}{},
+			},
+			[]string{},
 		},
 	}
 	for _, tt := range tests {

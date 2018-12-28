@@ -224,9 +224,9 @@ type Match struct {
 		Cur        string `json:"Cur"`
 	} `json:"hftodds,omitempty"`
 	Hhaodds struct {
-		A          string `json:"A"`
-		H          string `json:"H"`
-		D          string `json:"D"`
+		A          string `json:"A" odd:"value,type=hha"`
+		H          string `json:"H" odd:"value,type=hha"`
+		D          string `json:"D" odd:"value,type=hha"`
 		ID         string `json:"ID"`
 		POOLSTATUS string `json:"POOLSTATUS"`
 		INPLAY     string `json:"INPLAY"`
@@ -236,8 +236,8 @@ type Match struct {
 		Cur        string `json:"Cur"`
 	} `json:"hhaodds,omitempty"`
 	Hdcodds struct {
-		A          string `json:"A"`
-		H          string `json:"H"`
+		A          string `json:"A" odd:"value,type=hdc"`
+		H          string `json:"H" odd:"value,type=hdc"`
 		ID         string `json:"ID"`
 		POOLSTATUS string `json:"POOLSTATUS"`
 		INPLAY     string `json:"INPLAY"`
@@ -253,8 +253,8 @@ type Match struct {
 			LINESTATUS string `json:"LINESTATUS"`
 			LINEORDER  string `json:"LINEORDER"`
 			LINE       string `json:"LINE"`
-			H          string `json:"H"`
-			L          string `json:"L"`
+			H          string `json:"H" odd:"value,type=hil"`
+			L          string `json:"L" odd:"value,type=hil"`
 		} `json:"LINELIST"`
 		ID         string `json:"ID"`
 		POOLSTATUS string `json:"POOLSTATUS"`
@@ -269,8 +269,8 @@ type Match struct {
 			LINESTATUS string `json:"LINESTATUS"`
 			LINEORDER  string `json:"LINEORDER"`
 			LINE       string `json:"LINE"`
-			L          string `json:"L"`
-			H          string `json:"H"`
+			L          string `json:"L" odd:"value,type=fhl"`
+			H          string `json:"H" odd:"value,type=fhl"`
 		} `json:"LINELIST"`
 		ID         string `json:"ID"`
 		POOLSTATUS string `json:"POOLSTATUS"`
@@ -285,8 +285,8 @@ type Match struct {
 			LINESTATUS string `json:"LINESTATUS"`
 			LINEORDER  string `json:"LINEORDER"`
 			LINE       string `json:"LINE"`
-			H          string `json:"H"`
-			L          string `json:"L"`
+			H          string `json:"H" odd:"value,type=chl"`
+			L          string `json:"L" odd:"value,type=chl"`
 		} `json:"LINELIST"`
 		ID         string `json:"ID"`
 		POOLSTATUS string `json:"POOLSTATUS"`

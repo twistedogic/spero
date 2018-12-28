@@ -48,25 +48,25 @@ func (m Match) ToProto() []*pb.Odd {
 				away = v
 			}
 		}
-		for _, field := range fields {
-			if strings.Contains(field.Tag, "value") {
-				kv := tag.ParseTag(field.Tag)
-				if bettype, ok := kv["type"]; ok {
-					minbet, payout := ParsePayout(field.Value.String())
-					outcome := field.Name
-					metric.OddMetric.WithLabelValues(matchID, bettype, home.TeamNameEN, away.TeamNameEN, outcome).Set(payout)
-					odd := &pb.Odd{
-						Id:      matchID,
-						Home:    home.ToProto(),
-						Away:    away.ToProto(),
-						League:  league.ToProto(),
-						Outcome: field.Name,
-						BetType: bettype,
-						MinBet:  minbet,
-						Payout:  payout,
-					}
-					odds = append(odds, odd)
+	}
+	for _, field := range fields {
+		if strings.Contains(field.Tag, "value") {
+			kv := tag.ParseTag(field.Tag)
+			if bettype, ok := kv["type"]; ok {
+				minbet, payout := ParsePayout(field.Value.String())
+				outcome := field.Name
+				metric.OddMetric.WithLabelValues(matchID, bettype, home.TeamNameEN, away.TeamNameEN, outcome).Set(payout)
+				odd := &pb.Odd{
+					Id:      matchID,
+					Home:    home.ToProto(),
+					Away:    away.ToProto(),
+					League:  league.ToProto(),
+					Outcome: field.Name,
+					BetType: bettype,
+					MinBet:  minbet,
+					Payout:  payout,
 				}
+				odds = append(odds, odd)
 			}
 		}
 	}
