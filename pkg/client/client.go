@@ -4,23 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
+	"github.com/twistedogic/spero/pkg/errors"
 	"github.com/twistedogic/spero/pkg/schema"
 )
-
-type Error struct {
-	error
-	Type       string
-	StatusCode int
-}
-
-func newError(t string, status int, err error) Error {
-	return Error{
-		err, t, status,
-	}
-}
 
 type Client struct {
 	*http.Client
@@ -39,14 +29,15 @@ func (c *Client) GetMatchesByType(bettype string) ([]schema.Match, error) {
 		Matches []schema.Match `json:"matches"`
 	}
 	u := fmt.Sprintf("%s?jsontype=odds_%s.aspx", c.BaseURL, strings.ToLower(bettype))
+	log.Printf("making request to %s", u)
 	res, err := c.Get(u)
 	if err != nil {
-		return matches, newError("http", res.StatusCode, err)
+		return matches, errors.NewClientError("http", res.StatusCode, err)
 	}
 	defer res.Body.Close()
 	b, err := ioutil.ReadAll(res.Body)
 	if err := json.Unmarshal(b, &container); err != nil {
-		return matches, newError("json", 0, err)
+		return matches, errors.NewClientError("json", 0, err)
 	}
 	for _, c := range container {
 		matches = append(matches, c.Matches...)

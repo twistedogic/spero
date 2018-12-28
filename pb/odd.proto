@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package pb;
+
+service OddService {
+    rpc Poll(Empty) returns (stream Odd) {}
+}
+
+message Empty {
+
+}
+
+message Team {
+    int64 id = 1;
+    string name_cn = 2;
+    string name_en = 3;
+}
+
+message League {
+    int64 id = 1;
+    string shortname = 2;
+    string name_cn = 3;
+    string name_en = 4;
+}
+
+message Odd {
+    string id = 1;
+    Team home = 2;
+    Team away = 3;
+    string bet_type = 4;
+    string outcome = 5;
+    double payout = 6;
+    int64 min_bet = 7;
+    League league = 8;
+}

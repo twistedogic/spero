@@ -3,8 +3,9 @@ package schema
 import (
 	"encoding/json"
 	"strconv"
-	"strings"
 	"time"
+
+	pb "github.com/twistedogic/spero/pb"
 )
 
 const (
@@ -12,52 +13,40 @@ const (
 	DATE_FORMAT      = "2006-01-02-07:00"
 )
 
-type Entry struct {
-	Labels []string
-	Value  float64
-}
-
-type KeyValue struct {
-	Key   string
-	Value float64
-}
-
 type Team struct {
 	TeamID     string `json:"teamID"`
 	TeamNameCH string `json:"teamNameCH"`
 	TeamNameEN string `json:"teamNameEN"`
 }
 
-type HadOdd struct {
-	H          string `json:"H"`
-	D          string `json:"D"`
-	A          string `json:"A"`
-	ID         string `json:"ID"`
-	POOLSTATUS string `json:"POOLSTATUS"`
-	INPLAY     string `json:"INPLAY"`
-	ALLUP      string `json:"ALLUP"`
-	Cur        string `json:"Cur"`
+func (t Team) ToProto() *pb.Team {
+	id, _ := strconv.ParseInt(t.TeamID, 10, 64)
+	return &pb.Team{
+		Id:     id,
+		NameEn: t.TeamNameEN,
+		NameCn: t.TeamNameCH,
+	}
 }
 
-func (odd HadOdd) Outcome() []KeyValue {
-	odds := map[string]string{
-		"H": odd.H,
-		"A": odd.A,
-		"D": odd.D,
+type League struct {
+	LeagueID        string `json:"leagueID"`
+	LeagueShortName string `json:"leagueShortName"`
+	LeagueNameCH    string `json:"leagueNameCH"`
+	LeagueNameEN    string `json:"leagueNameEN"`
+}
+
+func (l League) ToProto() *pb.League {
+	id, _ := strconv.ParseInt(l.LeagueID, 10, 64)
+	return &pb.League{
+		Id:        id,
+		Shortname: l.LeagueShortName,
+		NameCn:    l.LeagueNameCH,
+		NameEn:    l.LeagueNameEN,
 	}
-	kv := []KeyValue{}
-	for k, val := range odds {
-		baseOdd := strings.Split(val, "@")
-		odd := baseOdd[len(baseOdd)-1]
-		if v, err := strconv.ParseFloat(odd, 64); err == nil {
-			kv = append(kv, KeyValue{k, v})
-		}
-	}
-	return kv
 }
 
 type Match struct {
-	MatchID           string `json:"matchID"`
+	MatchID           string `json:"matchID" odd:"id"`
 	MatchIDinofficial string `json:"matchIDinofficial"`
 	MatchNum          string `json:"matchNum"`
 	MatchDate         string `json:"matchDate"`
@@ -68,16 +57,11 @@ type Match struct {
 		CouponNameCH    string `json:"couponNameCH"`
 		CouponNameEN    string `json:"couponNameEN"`
 	} `json:"coupon"`
-	League struct {
-		LeagueID        string `json:"leagueID"`
-		LeagueShortName string `json:"leagueShortName"`
-		LeagueNameCH    string `json:"leagueNameCH"`
-		LeagueNameEN    string `json:"leagueNameEN"`
-	} `json:"league,omitempty"`
-	HomeTeam          Team   `json:"homeTeam"`
-	AwayTeam          Team   `json:"awayTeam"`
+	League            League `json:"league,omitempty" odd:"league"`
+	HomeTeam          Team   `json:"homeTeam" odd:"home"`
+	AwayTeam          Team   `json:"awayTeam" odd:"away"`
 	MatchStatus       string `json:"matchStatus,omitempty"`
-	MatchTime         string `json:"matchTime"`
+	MatchTime         string `json:"matchTime" odd:"match_time"`
 	Statuslastupdated string `json:"statuslastupdated,omitempty"`
 	Inplaydelay       string `json:"inplaydelay,omitempty"`
 	LiveEvent         struct {
@@ -103,9 +87,27 @@ type Match struct {
 	Cur          string `json:"Cur"`
 	IsDef        string `json:"isDef,omitempty"`
 	HasWebTV     bool   `json:"hasWebTV"`
-	Hadodds      HadOdd `json:"hadodds,omitempty"`
-	Fhaodds      HadOdd `json:"fhaodds,omitempty"`
-	Crsodds      struct {
+	Hadodds      struct {
+		H          string `json:"H" odd:"value,type=had"`
+		D          string `json:"D" odd:"value,type=had"`
+		A          string `json:"A" odd:"value,type=had"`
+		ID         string `json:"ID"`
+		POOLSTATUS string `json:"POOLSTATUS"`
+		INPLAY     string `json:"INPLAY"`
+		ALLUP      string `json:"ALLUP"`
+		Cur        string `json:"Cur"`
+	} `json:"hadodds,omitempty"`
+	Fhaodds struct {
+		H          string `json:"H" odd:"value,type=fha"`
+		D          string `json:"D" odd:"value,type=fha"`
+		A          string `json:"A" odd:"value,type=fha"`
+		ID         string `json:"ID"`
+		POOLSTATUS string `json:"POOLSTATUS"`
+		INPLAY     string `json:"INPLAY"`
+		ALLUP      string `json:"ALLUP"`
+		Cur        string `json:"Cur"`
+	} `json:"fhaodds,omitempty"`
+	Crsodds struct {
 		S0402      string `json:"S0402"`
 		S0205      string `json:"S0205"`
 		SM1MH      string `json:"SM1MH"`
@@ -182,8 +184,8 @@ type Match struct {
 		Cur        string `json:"Cur"`
 	} `json:"fcsodds,omitempty"`
 	Ooeodds struct {
-		O          string `json:"O"`
-		E          string `json:"E"`
+		O          string `json:"O" odd:"value,type=ooe"`
+		E          string `json:"E" odd:"value,type=ooe"`
 		ID         string `json:"ID"`
 		POOLSTATUS string `json:"POOLSTATUS"`
 		INPLAY     string `json:"INPLAY"`
@@ -299,19 +301,6 @@ type Match struct {
 	InplayPools  []string `json:"inplayPools"`
 }
 
-func (m Match) ToProm() []Entry {
-	id := m.MatchID
-	home := m.HomeTeam.TeamNameEN
-	away := m.AwayTeam.TeamNameEN
-	outcome := m.Hadodds.Outcome()
-	entries := make([]Entry, len(outcome))
-	t := "HAD"
-	for i, kv := range outcome {
-		entries[i] = Entry{[]string{id, t, home, away, kv.Key}, kv.Value}
-	}
-	return entries
-}
-
 func (m Match) GetLastUpdate() (time.Time, error) {
 	return time.Parse(TIMESTAMP_FORAMT, m.Statuslastupdated)
 }
@@ -337,5 +326,3 @@ func (s ByLastUpdate) Less(i, j int) bool {
 	b, _ := s.Matches[j].GetLastUpdate()
 	return a.After(b)
 }
-
-// Support all oddtypes to prom
