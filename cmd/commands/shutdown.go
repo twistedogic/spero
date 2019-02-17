@@ -8,7 +8,7 @@ import (
 )
 
 type StopService interface {
-	Stop() error
+	Stop()
 }
 
 func Graceful(stopFuncs ...StopService) error {
@@ -22,9 +22,7 @@ func Graceful(stopFuncs ...StopService) error {
 		os.Interrupt)
 	log.Printf("recieved %v, initialize shutdown", <-sigc)
 	for _, stopFunc := range stopFuncs {
-		if err := stopFunc.Stop(); err != nil {
-			return err
-		}
+		stopFunc.Stop()
 	}
 	return nil
 }

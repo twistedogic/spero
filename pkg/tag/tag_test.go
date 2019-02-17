@@ -37,7 +37,7 @@ func TestGetTaggedFields(t *testing.T) {
 			"No Tag",
 			args{
 				struct {
-					name string
+					Name string
 				}{
 					"hi",
 				},

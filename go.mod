@@ -1,12 +1,10 @@
 module github.com/twistedogic/spero
 
 require (
-	github.com/golang/protobuf v1.2.0
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
+	github.com/iancoleman/strcase v0.0.0-20180726023541-3605ed457bf7
+	github.com/jinzhu/gorm v1.9.2
+	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
+	github.com/lib/pq v1.0.0 // indirect
 	github.com/prometheus/client_golang v0.9.2
-	github.com/spf13/afero v1.1.2
 	github.com/urfave/cli v1.20.0
-	go.etcd.io/bbolt v1.3.0
-	golang.org/x/net v0.0.0-20181207154023-610586996380
-	google.golang.org/grpc v1.17.0
 )

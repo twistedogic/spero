@@ -9,4 +9,4 @@ rule_files:
 scrape_configs:
   - job_name: odd
     static_configs:
-      - targets: ['scraper:9090']
+      - targets: ['spero:8080']
