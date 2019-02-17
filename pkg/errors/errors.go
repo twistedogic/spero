@@ -1,18 +1,31 @@
 package errors
 
-import (
-	"github.com/twistedogic/spero/pkg/metric"
+const (
+	JSON_ERROR      = "json_error"
+	REQ_ERROR       = "request_error"
+	PARSE_ERROR     = "parse_error"
+	DB_ERROR        = "json_error"
+	NO_ERROR        = "no_error"
+	UNDEFINED_ERROR = "undefined_error"
 )
 
 type Error struct {
 	error
-	Type       string
-	StatusCode int
+	Type string
 }
 
-func NewClientError(t string, status int, err error) Error {
-	metric.ClientMetric.WithLabelValues(t, string(status)).Inc()
-	return Error{
-		err, t, status,
+func NewError(t string, err error) Error {
+	return Error{err, t}
+}
+
+func ParseError(err error) string {
+	errType := NO_ERROR
+	if err != nil {
+		if v, ok := err.(Error); !ok {
+			errType = UNDEFINED_ERROR
+		} else {
+			errType = v.Type
+		}
 	}
+	return errType
 }

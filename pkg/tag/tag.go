@@ -21,7 +21,9 @@ func GetTaggedFields(s interface{}, tagName string) []Field {
 		if t.Type.Kind() == reflect.Struct {
 			fields = append(fields, GetTaggedFields(v.Interface(), tagName)...)
 		}
-		if tag, ok := t.Tag.Lookup(tagName); ok && v.IsValid() && v.CanInterface() && reflect.Zero(v.Type()).Interface() != v.Interface() {
+		isValid := v.IsValid() && v.CanInterface()
+		isSet := reflect.Zero(v.Type()).Interface() != v.Interface()
+		if tag, ok := t.Tag.Lookup(tagName); ok && isValid && isSet {
 			fields = append(fields, Field{tag, t.Name, v})
 		}
 	}
