@@ -7,18 +7,25 @@ import (
 	"github.com/twistedogic/spero/pkg/client/base"
 )
 
+const (
+	DefaultURL = "https://bet.hkjc.com/football/getJSON.aspx"
+)
+
 type Client struct {
-	*base.Client
+	base.Client
 	BaseURL string
 }
 
-func New(oddURL string) *Client {
+func New(oddURL string) Client {
 	client := base.New()
-	return &Client{client, oddURL}
+	return Client{client, oddURL}
 }
 
-//https://bet.hkjc.com/football/getJSON.aspx?jsontype=odds_fha.aspx
-func (c *Client) GetOddTable(bettype string, value interface{}) error {
+func NewWithDefault() Client {
+	return New(DefaultURL)
+}
+
+func (c *Client) GetOddTable(bettype string) ([]byte, error) {
 	u := fmt.Sprintf("%s?jsontype=odds_%s.aspx", c.BaseURL, strings.ToLower(bettype))
-	return c.GetJSON(u, value)
+	return c.GetByte(u)
 }
