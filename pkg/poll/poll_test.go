@@ -1,55 +1,81 @@
 package poll
 
 import (
-	"reflect"
+	"context"
 	"testing"
 	"time"
 
-	"github.com/twistedogic/spero/pkg/schema/odd"
-	"github.com/twistedogic/spero/pkg/scraper/metascraper"
-	"github.com/twistedogic/spero/pkg/scraper/oddscraper"
+	"github.com/Jeffail/benthos/v3/public/service"
+	"github.com/twistedogic/spero/pkg/message"
 )
 
-func TestPoller_Start(t *testing.T) {
-	type fields struct {
-		poller       Poller
-		testInterval string
-		interval     string
+type testCase struct {
+	pointer       int
+	payload, want [][]byte
+}
+
+func (tc *testCase) next() bool {
+	tc.pointer++
+	if max := len(tc.payload) - 1; tc.pointer > max {
+		return false
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
-	}{
-		{"oddscraper", fields{oddscraper.New("https://bet.hkjc.com/football/getJSON.aspx", odd.HAD), "10s", "1s"}, false},
-		{"metascraper", fields{metascraper.New("https://lsc.fn.sportradar.com/hkjc/en", 5), "10s", "1s"}, false},
-		{"err", fields{oddscraper.New("http://localhost", odd.HAD), "10s", "1s"}, true},
+	return true
+}
+
+func (tc *testCase) check(t *testing.T, msg *service.Message) {
+	want := string(tc.want[tc.pointer])
+	b, err := msg.AsBytes()
+	if err != nil {
+		t.Fatal(err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			testInterval, err := time.ParseDuration(tt.fields.testInterval)
-			if err != nil {
-				t.Error(err)
+	got := string(b)
+	if want != got {
+		t.Fatalf("want:%s, got:%s", want, got)
+	}
+}
+
+func (tc *testCase) poll(ctx context.Context) (*service.Message, error) {
+	content := tc.payload[tc.pointer]
+	return message.NewContentHashMessage(content), nil
+}
+
+func TestPoller(t *testing.T) {
+	cases := map[string]testCase{
+		"base": testCase{
+			payload: [][]byte{
+				[]byte(`a`),
+				[]byte(`b`),
+				[]byte(`c`),
+				[]byte(`d`),
+			},
+			want: [][]byte{
+				[]byte(`a`),
+				[]byte(`b`),
+				[]byte(`c`),
+				[]byte(`d`),
+			},
+		},
+	}
+	for name := range cases {
+		tc := cases[name]
+		t.Run(name, func(t *testing.T) {
+			poller := New(tc.poll, time.Millisecond)
+			ctx := context.TODO()
+			if err := poller.Connect(ctx); err != nil {
+				t.Fatal(err)
 			}
-			interval, err := time.ParseDuration(tt.fields.interval)
-			if err != nil {
-				t.Error(err)
-			}
-			p := New(tt.fields.poller, interval)
-			ch := make(chan interface{})
-			go func() {
-				time.Sleep(testInterval)
-				p.Stop()
-			}()
-			go func() {
-				for v := range ch {
-					if reflect.DeepEqual(v, odd.Outcome{}) {
-						t.Error(v)
-					}
+			for {
+				got, _, err := poller.Read(ctx)
+				if err != nil {
+					t.Fatal(err)
 				}
-			}()
-			if err := p.Start(ch); (err != nil) != tt.wantErr {
-				t.Errorf("Poller.Start() error = %v, wantErr %v", err, tt.wantErr)
+				tc.check(t, got)
+				if !tc.next() {
+					break
+				}
+			}
+			if err := poller.Close(ctx); err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
