@@ -34,9 +34,12 @@ func (tc *testCase) check(t *testing.T, msg *service.Message) {
 	}
 }
 
-func (tc *testCase) poll(ctx context.Context) (*service.Message, error) {
-	content := tc.payload[tc.pointer]
-	return message.NewContentHashMessage(content), nil
+func (tc *testCase) poll(ctx context.Context) ([]*service.Message, error) {
+	msg := make([]*service.Message, len(tc.payload))
+	for i, b := range tc.payload {
+		msg[i] = message.NewContentHashMessage(b)
+	}
+	return msg, nil
 }
 
 func TestPoller(t *testing.T) {

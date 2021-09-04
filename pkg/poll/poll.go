@@ -12,7 +12,7 @@ import (
 	"github.com/twistedogic/spero/pkg/message"
 )
 
-type PollFunc func(context.Context) (*service.Message, error)
+type PollFunc func(context.Context) ([]*service.Message, error)
 
 type Poller struct {
 	*sync.RWMutex
@@ -65,11 +65,13 @@ func (p *Poller) addToBuffer(msg *service.Message) {
 }
 
 func (p *Poller) poll(ctx context.Context) {
-	msg, err := p.pollFunc(ctx)
+	msgs, err := p.pollFunc(ctx)
 	if err != nil {
 		log.Println(errors.Wrap(err, "poll error"))
 	}
-	p.addToBuffer(msg)
+	for _, msg := range msgs {
+		p.addToBuffer(msg)
+	}
 }
 
 func (p *Poller) Poll(ctx context.Context) {
