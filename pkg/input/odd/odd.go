@@ -1,14 +1,12 @@
 package odd
 
 import (
-	"context"
 	"time"
 
 	"github.com/Jeffail/benthos/v3/public/service"
 	"github.com/pkg/errors"
 
 	"github.com/twistedogic/spero/pkg/client/oddclient"
-	"github.com/twistedogic/spero/pkg/message"
 	"github.com/twistedogic/spero/pkg/poll"
 )
 
@@ -46,11 +44,7 @@ func Register() error {
 		}
 		baseURL, err := conf.FieldString(urlField)
 		client := oddclient.New(baseURL)
-		pollFunc := func(ctx context.Context) (*service.Message, error) {
-			b, err := client.GetOddTable(oddType)
-			return message.NewContentHashMessage(b), err
-		}
-		return poll.New(pollFunc, interval), nil
+		return poll.New(client.PollOdd(oddType), interval), nil
 	}
 	if err := service.RegisterInput(InputName, configSpec, constructor); err != nil {
 		return errors.Wrapf(err, "register input %s", InputName)
