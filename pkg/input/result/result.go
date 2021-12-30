@@ -1,4 +1,4 @@
-package odd
+package result
 
 import (
 	"time"
@@ -7,44 +7,54 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/twistedogic/spero/pkg/client/jc"
+	"github.com/twistedogic/spero/pkg/input/inpututil"
 	"github.com/twistedogic/spero/pkg/poll"
 )
 
 const (
-	InputName = "odd"
+	InputName = "result"
 
-	typeField     = "odd_type"
 	intervalField = "interval"
 	urlField      = "base_url"
+	startField    = "start"
+	endField      = "end"
 
-	typeFieldDefault     = "had"
 	intervalFieldDefault = "15m"
 	urlFieldDefault      = jc.DefaultURL
 )
 
+var (
+	startFieldDefault = time.Date(2018, 1, 1, 0, 0, 0, 0, time.UTC).Format(inpututil.TimeFormat)
+	endFieldDefault   = time.Now().UTC().Format(inpututil.TimeFormat)
+)
+
 func Register() error {
 	configSpec := service.NewConfigSpec().
-		Summary("Type of odd to monitor").
-		Field(service.NewStringField(typeField).Default(typeFieldDefault)).
+		Summary("match and odd result to poll").
 		Field(service.NewStringField(intervalField).Default(intervalFieldDefault)).
-		Field(service.NewStringField(urlField).Default(urlFieldDefault))
+		Field(service.NewStringField(urlField).Default(urlFieldDefault)).
+		Field(service.NewStringField(startField).Default(startFieldDefault)).
+		Field(service.NewStringField(endField).Default(endFieldDefault))
 
 	constructor := func(conf *service.ParsedConfig, mgr *service.Resources) (service.Input, error) {
-		oddType, err := conf.FieldString(typeField)
+		interval, err := inpututil.ParseIntervalField(conf, intervalField)
 		if err != nil {
 			return nil, err
 		}
-		intervalStr, err := conf.FieldString(intervalField)
+		start, err := inpututil.ParseTimeField(conf, startField)
 		if err != nil {
 			return nil, err
 		}
-		interval, err := time.ParseDuration(intervalStr)
+		end, err := inpututil.ParseTimeField(conf, endField)
 		if err != nil {
 			return nil, err
 		}
 		baseURL, err := conf.FieldString(urlField)
+		if err != nil {
+			return nil, err
+		}
 		client := jc.New(baseURL)
-		return poll.New(client.PollOdd(oddType), interval), nil
+		return poll.New(client.PollResult(start, end), interval), nil
 	}
 	if err := service.RegisterInput(InputName, configSpec, constructor); err != nil {
 		return errors.Wrapf(err, "register input %s", InputName)

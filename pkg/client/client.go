@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -12,8 +13,8 @@ const (
 
 var client = new(http.Client)
 
-func GetByte(ctx context.Context, u string) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", u, nil)
+func requestBytes(ctx context.Context, method, url string, body io.Reader) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return nil, err
 	}
@@ -24,4 +25,12 @@ func GetByte(ctx context.Context, u string) ([]byte, error) {
 	}
 	defer res.Body.Close()
 	return ioutil.ReadAll(res.Body)
+}
+
+func GetByte(ctx context.Context, url string) ([]byte, error) {
+	return requestBytes(ctx, http.MethodGet, url, nil)
+}
+
+func PostByte(ctx context.Context, url string, body io.Reader) ([]byte, error) {
+	return requestBytes(ctx, http.MethodPost, url, body)
 }

@@ -1,0 +1,6 @@
+input:
+  result: {}
+
+output:
+  stdout:
+    codec: lines
