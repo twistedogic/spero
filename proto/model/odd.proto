@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package model;
+
+option go_package = "github.com/twistedogic/spero/proto/model";
+
+enum Type { HAD = 0; }
+
+enum Outcome {
+  HOME = 0;
+  AWAY = 1;
+  DRAW = 2;
+}
+
+message Odd {
+  string id = 1;
+  string match_id = 2;
+  Outcome outcome = 3;
+  Type type = 4;
+  float odd = 5;
+}
+
+message Bet {
+  string id = 1;
+  Odd odd = 2;
+  float size = 3;
+}

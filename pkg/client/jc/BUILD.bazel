@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "jc",
+    srcs = ["jc.go"],
+    importpath = "github.com/twistedogic/spero/pkg/client/jc",
+    visibility = ["//visibility:public"],
+    deps = ["//pkg/client"],
+)
+
+go_test(
+    name = "jc_test",
+    srcs = ["jc_test.go"],
+    data = glob(["testdata/**"]),
+    embed = [":jc"],
+)

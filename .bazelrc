@@ -1,0 +1,3 @@
+startup --batch_cpu_scheduling --io_nice_level 7
+build --jobs 10 
+test --jobs 10 --test_arg=-test.v --test_output=all

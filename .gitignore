@@ -14,3 +14,7 @@
 *.db
 *.ipynb
 .ipynb_checkpoint
+
+.DS_Store
+
+bazel-*

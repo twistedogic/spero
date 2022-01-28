@@ -1,6 +1,0 @@
-input:
-  odd: {}
-
-output:
-  stdout:
-    codec: lines

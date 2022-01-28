@@ -1,0 +1,57 @@
+{
+  "shadow": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "unsafeptr": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "lostcancel": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "nilness": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "composites": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "printf": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "copylocks": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "unreachable": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "stdmethods": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "stringintconv": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  },
+  "pkgfact": {
+    "exclude_files": {
+      "/external/": "disable external"
+    }
+  }
+}

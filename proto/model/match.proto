@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package model;
+
+option go_package = "github.com/twistedogic/spero/proto/model";
+
+import "google/protobuf/timestamp.proto";
+
+message League {
+  string id = 1;
+  string name = 2;
+}
+
+message Team {
+  string id = 1;
+  string name = 2;
+}
+
+message Score {
+  int32 home = 1;
+  int32 away = 2;
+}
+
+message Match {
+  string id = 1;
+  google.protobuf.Timestamp date = 2;
+  League league = 3;
+  Team home = 4;
+  Team away = 5;
+  Score first_half = 6;
+  Score second_half = 7;
+  Score extra_time = 8;
+}
