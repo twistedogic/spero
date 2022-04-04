@@ -2,7 +2,6 @@ package jc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
@@ -24,8 +23,23 @@ const (
 	MONTH = 28 * 24 * time.Hour
 )
 
-type data struct {
-	Matches []json.RawMessage `json:"matches"`
+func chunkByDuration(dur time.Duration, start, end time.Time) []time.Time {
+	if start.After(end) {
+		start, end = end, start
+	}
+	out := make([]time.Time, 0)
+	current := start
+	out = append(out, current)
+	for current.Before(end) {
+		current = current.Add(dur)
+		switch {
+		case current.After(end), current.Equal(end):
+			out = append(out, end)
+		default:
+			out = append(out, current)
+		}
+	}
+	return out
 }
 
 func getResultURL(base string, start, end time.Time) string {

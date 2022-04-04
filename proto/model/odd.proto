@@ -4,12 +4,15 @@ package model;
 
 option go_package = "github.com/twistedogic/spero/proto/model";
 
-enum Type { HAD = 0; }
+enum Type {
+  HAD = 0;
+  FHA = 1;
+}
 
 enum Outcome {
-  HOME = 0;
-  AWAY = 1;
-  DRAW = 2;
+  H = 0;
+  A = 1;
+  D = 2;
 }
 
 message Odd {
