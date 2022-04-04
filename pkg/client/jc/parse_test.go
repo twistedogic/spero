@@ -27,7 +27,12 @@ func Test_parseResponse(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			t.Log(got)
+			if len(got.Matches) == 0 {
+				t.Fatal("'matches' is empty")
+			}
+			if len(got.Odds) == 0 {
+				t.Fatal("'odds' is empty")
+			}
 		})
 	}
 }

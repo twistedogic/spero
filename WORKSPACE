@@ -75,6 +75,13 @@ go_repository(
     version = "v1.5.0",
 )
 
+go_repository(
+    name = "com_github_pkg_errors",
+    importpath = "github.com/pkg/errors",
+    sum = "h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=",
+    version = "v0.9.1",
+)
+
 go_rules_dependencies()
 
 go_register_toolchains(

@@ -2,56 +2,58 @@ package jc
 
 import (
 	"encoding/json"
-	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/twistedogic/spero/proto/model"
 )
 
-type Matches []Content
+type Response []Content
 
 type Content struct {
-	Matches []Match `json:"matches"`
+	Matches []json.RawMessage `json:"matches"`
 }
 
-type League struct {
-	ID   string `json:"leagueID"`
-	Name string `json:"leagueNameEN"`
+func (r Response) flatten() []json.RawMessage {
+	out := make([]json.RawMessage, 0)
+	for _, content := range r {
+		out = append(out, content.Matches...)
+	}
+	return out
 }
 
-func (l League) toModel() *model.League {
-	return &model.League{Id: l.ID, Name: l.Name}
+func (r Response) unmarshal(i interface{}) error {
+	b, err := json.Marshal(r.flatten())
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, &i)
 }
 
-type Team struct {
-	ID   string `json:"teamID"`
-	Name string `json:"teamNameEN"`
+func (r Response) toMatches() ([]*model.Match, error) {
+	matches := make([]Match, 0)
+	if err := r.unmarshal(&matches); err != nil {
+		return nil, err
+	}
+	out := make([]*model.Match, len(matches))
+	for i, m := range matches {
+		mm, err := m.toModel()
+		if err != nil {
+			return nil, errors.Wrapf(err, "convert match %s", m.ID)
+		}
+		out[i] = mm
+	}
+	return out, nil
 }
 
-type Score struct {
-	Home string `json:"home"`
-	Away string `json:"away"`
-}
-
-type Match struct {
-	ID     string  `json:"matchID"`
-	Date   string  `json:"matchTime"`
-	Status string  `json:"matchStatus"`
-	League League  `json:"league"`
-	Home   Team    `json:"homeTeam"`
-	Away   Team    `json:"awayTeam"`
-	Scores []Score `json:"accumulatedscore"`
-}
-
-type Odds []*model.Odd
-
-func (o Odds) UnmarshalJSON(b []byte) error {
-	i := make(map[string]interface{})
-
+func (r Response) toOdds() ([]*model.MatchOdd, error) {
+	odds := MatchOdds{}
+	err := r.unmarshal(&odds)
+	return odds.Odds, err
 }
 
 type result struct {
 	Matches []*model.Match
-	Odds    []*model.Odd
+	Odds    []*model.MatchOdd
 }
 
 func (r *result) UnmarshalJSON(b []byte) error {
@@ -63,15 +65,15 @@ func (r *result) UnmarshalJSON(b []byte) error {
 }
 
 func parseResponse(b []byte) (result, error) {
-	m, res := make(Matches, 0), result{}
-	if err := json.Unmarshal(b, &m); err != nil {
-		return res, err
-	}
-	mBytes, err := json.MarshalIndent(&m, "", "  ")
+	r, res := make(Response, 0), result{}
+	err := json.Unmarshal(b, &r)
 	if err != nil {
 		return res, err
 	}
-	fmt.Println(string(mBytes))
-	err = json.Unmarshal(mBytes, &res)
+	res.Matches, err = r.toMatches()
+	if err != nil {
+		return res, err
+	}
+	res.Odds, err = r.toOdds()
 	return res, err
 }

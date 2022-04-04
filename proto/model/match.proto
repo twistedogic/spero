@@ -27,7 +27,5 @@ message Match {
   League league = 3;
   Team home = 4;
   Team away = 5;
-  Score first_half = 6;
-  Score second_half = 7;
-  Score extra_time = 8;
+  repeated Score scores = 6;
 }

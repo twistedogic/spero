@@ -12,11 +12,11 @@ import (
 )
 
 type ByDates interface {
-	GetMatchesByDates(context.Context, time.Time, time.Time) ([]*model.Match, []*model.Odd, error)
+	GetMatchesByDates(context.Context, time.Time, time.Time) ([]*model.Match, []*model.MatchOdd, error)
 }
 
 type ByInstant interface {
-	GetCurrentMatches(context.Context, model.Type) ([]*model.Match, []*model.Odd, error)
+	GetCurrentMatches(context.Context, model.MatchOdd_Type) ([]*model.Match, []*model.MatchOdd, error)
 }
 
 type Source interface {

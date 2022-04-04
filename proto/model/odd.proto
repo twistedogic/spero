@@ -4,11 +4,6 @@ package model;
 
 option go_package = "github.com/twistedogic/spero/proto/model";
 
-enum Type {
-  HAD = 0;
-  FHA = 1;
-}
-
 enum Outcome {
   H = 0;
   A = 1;
@@ -16,15 +11,24 @@ enum Outcome {
 }
 
 message Odd {
+  Outcome outcome = 3;
+  float odd = 5;
+}
+
+message MatchOdd {
+  enum Type {
+    HAD = 0;
+    FHA = 1;
+  }
+
   string id = 1;
   string match_id = 2;
-  Outcome outcome = 3;
-  Type type = 4;
-  float odd = 5;
+  Type type = 3;
+  repeated Odd odds = 4;
 }
 
 message Bet {
   string id = 1;
-  Odd odd = 2;
+  Outcome outcome = 2;
   float size = 3;
 }
