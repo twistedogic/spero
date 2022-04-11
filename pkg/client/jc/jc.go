@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/twistedogic/spero/pkg/client"
+	"github.com/twistedogic/spero/proto/model"
 )
 
 const (
@@ -71,4 +72,33 @@ func (c Client) getInstant(ctx context.Context, bettype string) ([]byte, error) 
 func (c Client) getHistorical(ctx context.Context, start, end time.Time) ([]byte, error) {
 	u := getResultURL(c.BaseURL, start, end)
 	return client.PostByte(ctx, u, nil)
+}
+
+func (c Client) GetCurrentMatches(ctx context.Context, t model.MatchOdd_Type) (client.Result, error) {
+	typeName := model.MatchOdd_Type_name[int32(t)]
+	b, err := c.getInstant(ctx, typeName)
+	if err != nil {
+		return client.Result{}, err
+	}
+	return parseResponse(b)
+}
+
+func (c Client) GetMatchesByDates(ctx context.Context, start, end time.Time) (client.Result, error) {
+	res := client.Result{}
+	chunks := chunkByDuration(MONTH, start, end)
+	for i := range chunks {
+		if i == 0 {
+			continue
+		}
+		b, err := c.getHistorical(ctx, chunks[i-1], chunks[i])
+		if err != nil {
+			return res, err
+		}
+		r, err := parseResponse(b)
+		if err != nil {
+			return res, err
+		}
+		res = res.Merge(r)
+	}
+	return res, nil
 }

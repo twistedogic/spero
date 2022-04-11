@@ -11,12 +11,24 @@ import (
 	"github.com/twistedogic/spero/proto/model"
 )
 
-type ByDates interface {
-	GetMatchesByDates(context.Context, time.Time, time.Time) ([]*model.Match, []*model.MatchOdd, error)
+type Result struct {
+	Matches []*model.Match
+	Odds    []*model.MatchOdd
+}
+
+func (r Result) Merge(o Result) Result {
+	return Result{
+		Matches: append(r.Matches, o.Matches...),
+		Odds:    append(r.Odds, o.Odds...),
+	}
 }
 
 type ByInstant interface {
-	GetCurrentMatches(context.Context, model.MatchOdd_Type) ([]*model.Match, []*model.MatchOdd, error)
+	GetCurrentMatches(context.Context, model.MatchOdd_Type) (Result, error)
+}
+
+type ByDates interface {
+	GetMatchesByDates(context.Context, time.Time, time.Time) (Result, error)
 }
 
 type Source interface {

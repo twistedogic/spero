@@ -14,7 +14,7 @@ const (
 	fhaodds = "fhaodds"
 )
 
-type MatchOdds struct {
+type matchOdds struct {
 	Odds []*model.MatchOdd
 }
 
@@ -56,7 +56,7 @@ func parseHadOdd(t model.MatchOdd_Type, matchId string, i interface{}) (*model.M
 	}, nil
 }
 
-func (m *MatchOdds) parseMatchOdd(t model.MatchOdd_Type, matchId string, i interface{}) error {
+func (m *matchOdds) parseMatchOdd(t model.MatchOdd_Type, matchId string, i interface{}) error {
 	if m.Odds == nil {
 		m.Odds = make([]*model.MatchOdd, 0)
 	}
@@ -68,7 +68,7 @@ func (m *MatchOdds) parseMatchOdd(t model.MatchOdd_Type, matchId string, i inter
 	return nil
 }
 
-func (m *MatchOdds) UnmarshalJSON(b []byte) error {
+func (m *matchOdds) UnmarshalJSON(b []byte) error {
 	matches := make([]map[string]interface{}, 0)
 	if err := json.Unmarshal(b, &matches); err != nil {
 		return err

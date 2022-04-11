@@ -4,16 +4,17 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
+	"github.com/twistedogic/spero/pkg/client"
 	"github.com/twistedogic/spero/proto/model"
 )
 
-type Response []Content
+type response []content
 
-type Content struct {
+type content struct {
 	Matches []json.RawMessage `json:"matches"`
 }
 
-func (r Response) flatten() []json.RawMessage {
+func (r response) flatten() []json.RawMessage {
 	out := make([]json.RawMessage, 0)
 	for _, content := range r {
 		out = append(out, content.Matches...)
@@ -21,7 +22,7 @@ func (r Response) flatten() []json.RawMessage {
 	return out
 }
 
-func (r Response) unmarshal(i interface{}) error {
+func (r response) unmarshal(i interface{}) error {
 	b, err := json.Marshal(r.flatten())
 	if err != nil {
 		return err
@@ -29,8 +30,8 @@ func (r Response) unmarshal(i interface{}) error {
 	return json.Unmarshal(b, &i)
 }
 
-func (r Response) toMatches() ([]*model.Match, error) {
-	matches := make([]Match, 0)
+func (r response) toMatches() ([]*model.Match, error) {
+	var matches []Match
 	if err := r.unmarshal(&matches); err != nil {
 		return nil, err
 	}
@@ -45,27 +46,15 @@ func (r Response) toMatches() ([]*model.Match, error) {
 	return out, nil
 }
 
-func (r Response) toOdds() ([]*model.MatchOdd, error) {
-	odds := MatchOdds{}
+func (r response) toOdds() ([]*model.MatchOdd, error) {
+	var odds matchOdds
 	err := r.unmarshal(&odds)
 	return odds.Odds, err
 }
 
-type result struct {
-	Matches []*model.Match
-	Odds    []*model.MatchOdd
-}
-
-func (r *result) UnmarshalJSON(b []byte) error {
-	data := make([]json.RawMessage, 0)
-	if err := json.Unmarshal(b, &data); err != nil {
-		return err
-	}
-	return nil
-}
-
-func parseResponse(b []byte) (result, error) {
-	r, res := make(Response, 0), result{}
+func parseResponse(b []byte) (client.Result, error) {
+	var r response
+	var res client.Result
 	err := json.Unmarshal(b, &r)
 	if err != nil {
 		return res, err
